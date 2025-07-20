@@ -1,0 +1,38 @@
+name: Generate File List
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  generate-file-list:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Generate file list as JSON
+        run: |
+          find . -type f \
+            -not -path "./.git/*" \
+            -not -name "files.json" \
+            | sed 's|^\./||' \
+            | jq -R -s -c 'split("\n")[:-1]' > files.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet files.json; then
+            echo "No changes to commit"
+          else
+            git add files.json
+            git commit -m "Update files.json with file list"
+            git push
+          fi
