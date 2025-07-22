@@ -23,7 +23,7 @@ jobs:
         run: |
           find . -type f \
             -not -path "./.git/*" \
-            -not -name "files.json" \
+            -iname '*.png' \
             | sed 's|^\./||' \
             | jq -R -s -c 'split("\n")[:-1]' > files.json
 
@@ -33,6 +33,6 @@ jobs:
             echo "No changes to commit"
           else
             git add files.json
-            git commit -m "Update files.json with file list"
+            git commit -m "chore: update files.json with file list"
             git push
           fi
